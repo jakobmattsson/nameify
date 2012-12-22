@@ -1,0 +1,22 @@
+{
+  "name": "nameify",
+  "description": "Converts an api from passing arguments by position to passing them by name",
+  "version": "0.1.0",
+  "main": "./lib/nameify.js",
+  "devDependencies": {
+    "should": "1.2.1",
+    "mocha": "1.7.4",
+    "jscov": "0.1.0",
+    "mocha-term-cov-reporter": "0.1.0",
+    "coffee-script": "1.4.0"
+  },
+  "engines": {
+    "node": ">=0.6.x"
+  },
+  "scripts": {
+    "pretest": "coffee -co lib src",
+    "prepublish": "coffee -co lib src",
+    "coverage": "jscov src .cov && SRC_DIR=.cov mocha --compilers coffee:coffee-script --reporter mocha-term-cov-reporter tests/nameify.coffee",
+    "test": "mocha --compilers coffee:coffee-script tests/*.coffee"
+  }
+}
