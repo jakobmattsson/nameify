@@ -25,15 +25,18 @@ spec = {
   set: ['name', 'value']
 }
 
+ap2 = (name, params, callback) ->
+  callback(null, { method: name, params: params })
+
 
 
 it "should successfully transform an api to a function", () ->
-  nameify(testapi, spec).should.be.a 'function'
+  nameify.byName(testapi, spec).should.be.a 'function'
 
 
 
 it "should raise an error if an invalid function is called", () ->
-  api = nameify(testapi, spec)
+  api = nameify.byName(testapi, spec)
   f = -> api 'invalid-function', {}, ->
   f.should.throw "No function with the name 'invalid-function'!"
 
@@ -46,7 +49,7 @@ it "should pass arguments through properly", (done) ->
     isOK.should.be.true
     done()
 
-  api = nameify({
+  api = nameify.byName({
     set: (name, value, callback) ->
       isOK = name == 'n' && value == 'v' && callback == f
       callback()
@@ -65,7 +68,7 @@ it "should pass arguments through properly, even when in the wrong order", (done
     isOK.should.be.true
     done()
 
-  api = nameify({
+  api = nameify.byName({
     set: (name, value, callback) ->
       isOK = name == 'n' && value == 'v' && callback == f
       callback()
@@ -84,7 +87,7 @@ it "should pass arguments through properly, even when some are missing", (done) 
     isOK.should.be.true
     done()
 
-  api = nameify({
+  api = nameify.byName({
     set: (name, value, callback) ->
       isOK = name == undefined && value == 'v' && callback == f
       callback()
@@ -97,10 +100,27 @@ it "should pass arguments through properly, even when some are missing", (done) 
 
 
 it "should retin proper context after being converted", (done) ->
-  api = nameify(testapi, spec)
+  api = nameify.byName(testapi, spec)
   api 'set', { name: 'key', value: 123 }, (err) ->
     should.not.exist err
     api 'get', { name: 'key' }, (err, val) ->
       should.not.exist err
       val.should.eql 123
+      done()
+
+
+
+describe 'byPosition', ->
+
+  it "should successfully transform a single api-function to an api-object", ->
+    nameify.byPosition(ap2, spec).should.be.a 'object'
+
+  it "should successfully create all the api-functions", ->
+    nameify.byPosition(ap2, spec).should.have.keys ['get', 'set']
+
+  it "should successfully create all the api-functions", (done) ->
+    api = nameify.byPosition(ap2, spec)
+    api.set 'n', 'v', (err, d) ->
+      should.not.exist err
+      d.should.eql { method: 'set', params: { name: 'n', value: 'v' } }
       done()
